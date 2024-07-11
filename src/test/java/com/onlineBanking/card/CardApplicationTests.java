@@ -1,4 +1,4 @@
-package com.microservice.card;
+package com.onlineBanking.card;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
