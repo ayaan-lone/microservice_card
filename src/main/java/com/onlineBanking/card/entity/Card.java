@@ -5,6 +5,9 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
@@ -13,8 +16,12 @@ public class Card implements Serializable {
 
 	private static final long serialVersionUID = -1049224080423904773L;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column
 	private long id;
+	@Column
+	private long userId;
 	@Column
 	private long cardNumber;
 	@Column
@@ -35,6 +42,14 @@ public class Card implements Serializable {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
 	}
 
 	public long getCardNumber() {
