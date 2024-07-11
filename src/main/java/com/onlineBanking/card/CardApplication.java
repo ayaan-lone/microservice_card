@@ -1,4 +1,4 @@
-package com.microservice.card;
+package com.onlineBanking.card;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
