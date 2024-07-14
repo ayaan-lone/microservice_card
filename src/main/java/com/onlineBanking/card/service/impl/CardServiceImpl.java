@@ -20,12 +20,13 @@ public class CardServiceImpl implements CardService {
 	@Autowired
 	private CardRepository cardRepository;
 
-	@Autowired
+	@Autowired 
 	private RestTemplate restTemplate;
 
 	@Override
 	public Card createCard(long userId, long accountId) throws CardApplicationException {
 		// Generate card logic
+		
 		Card card = new Card();
 		card.setUserId(userId);
 		String cardType = fetchCardTypeFromMetadata(accountId);
