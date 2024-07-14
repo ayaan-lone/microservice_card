@@ -12,6 +12,6 @@ public class HealthCheckController {
 	
 	@GetMapping("health-check")
 	ResponseEntity<String> healthCheck(){
-		return ResponseEntity.status(HttpStatus.OK).body("Card Microservice is working");
+		return ResponseEntity.status(HttpStatus.OK).body("Card Microservice check is working");
 	}
 }
