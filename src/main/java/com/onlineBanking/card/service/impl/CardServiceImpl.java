@@ -1,5 +1,6 @@
 package com.onlineBanking.card.service.impl;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -55,5 +56,9 @@ public class CardServiceImpl implements CardService {
 			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.CARD_NOT_FOUND);
 		}
 		return response.getBody();
+	}
+	@Override
+	public List<Card> findCardByUserId(long userId) throws CardApplicationException {
+		return cardRepository.findByUserId(userId);
 	}
 }

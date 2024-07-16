@@ -1,11 +1,15 @@
 package com.onlineBanking.card.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.onlineBanking.card.entity.Card;
 import com.onlineBanking.card.exception.CardApplicationException;
 import com.onlineBanking.card.request.CreateCardDto;
 import com.onlineBanking.card.service.CardService;
@@ -32,6 +36,12 @@ public class CardController {
 	    @PostMapping("cards/deactivate")
 		public String deactivateCard(@RequestParam Long userId, @RequestParam String last4Digits) throws CardApplicationException {
 	        return cardService.deactivateCard(userId, last4Digits);
+	    }
+	    
+	    // Get list of cards by user ID
+	    @GetMapping("list")
+	    public List<Card> getCardByUserId(@RequestParam long userId) throws CardApplicationException {
+	        return cardService.findCardByUserId(userId);
 	    }
 
 }
