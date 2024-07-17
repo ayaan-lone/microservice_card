@@ -25,7 +25,7 @@ public class CardServiceImpl implements CardService {
 	private RestTemplate restTemplate;
 
 	@Override
-	public Card createCard(long userId, long accountId) throws CardApplicationException {
+	public Card createCard(long userId, long accountId, long cardId) throws CardApplicationException {
 		// Generate card logic
 		
 		Card card = new Card();
