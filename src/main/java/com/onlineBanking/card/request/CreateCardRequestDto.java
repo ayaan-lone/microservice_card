@@ -2,7 +2,7 @@ package com.onlineBanking.card.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CreateCardDto {
+public class CreateCardRequestDto {
 
 	@JsonProperty("userId")
 	private long userId;
@@ -10,9 +10,21 @@ public class CreateCardDto {
 	@JsonProperty("accountId")
 	private long accountId;
 
-	public CreateCardDto(long userId, long accountId) {
+	@JsonProperty("id")
+	private long cardId;
+
+	public CreateCardRequestDto(long userId, long accountId, long cardId) {
 		this.userId = userId;
 		this.accountId = accountId;
+		this.cardId= cardId;
+	}
+
+	public long getCardId() {
+		return cardId;
+	}
+
+	public void setCardId(long cardId) {
+		this.cardId = cardId;
 	}
 
 	public long getUserId() {
@@ -31,5 +43,4 @@ public class CreateCardDto {
 		this.accountId = accountId;
 	}
 
-	
 }
