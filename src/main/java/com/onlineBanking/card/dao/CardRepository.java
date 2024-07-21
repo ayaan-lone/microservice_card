@@ -18,5 +18,6 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 			@Param("last4Digits") String last4Digits);
 	
 	List<Card> findByUserId(long userId);
-	Optional<Card> findByAccountIdAndId(long accountId, long id);
+
+	boolean existsByCardNumber(Long cardNumber);
 }
