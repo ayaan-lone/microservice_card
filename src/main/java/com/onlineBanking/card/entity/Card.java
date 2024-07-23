@@ -25,7 +25,6 @@ public class Card implements Serializable {
 	private long cardNumber;
 	@Column
 	private String cardType;
-	// private List<BankService> service;
 	@Column
 	private boolean isActive;
 	@Column
@@ -99,4 +98,5 @@ public class Card implements Serializable {
 		this.monthlyLimit = monthlyLimit;
 	}
 
-}
+	}
+

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.onlineBanking.card.entity.Card;
 import com.onlineBanking.card.exception.CardApplicationException;
 import com.onlineBanking.card.request.CreateCardRequestDto;
+import com.onlineBanking.card.request.TransactionRequestDTO;
 import com.onlineBanking.card.service.CardService;
 
 @RestController
@@ -56,5 +57,12 @@ public class CardController {
 	public List<Card> getCardByUserId(@RequestParam long userId) throws CardApplicationException {
 		return cardService.findCardByUserId(userId);
 	}
+	
+	
+    @PostMapping("/transaction")
+    public ResponseEntity<String> handleTransaction(@RequestBody TransactionRequestDTO transactionRequest) throws CardApplicationException {
+        String response = cardService.handleTransaction(transactionRequest);
+        return ResponseEntity.ok(response);
+    }
 
 }
