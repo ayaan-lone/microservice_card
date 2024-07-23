@@ -17,7 +17,9 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 	Optional<Card> findByUserIdAndCardNumberEndsWith(@Param("userId") Long userId,
 			@Param("last4Digits") String last4Digits);
 	
+
 	List<Card> findByUserId(long userId);
+	Optional<Card> findByUserIdAndCardType(Long userId, String cardType);
 
 	boolean existsByCardNumber(Long cardNumber);
 }

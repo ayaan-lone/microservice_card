@@ -43,6 +43,13 @@ public class CardController {
 			throws CardApplicationException {
 		return cardService.deactivateCard(userId, last4Digits);
 	}
+	
+	// Activate a card
+		@PostMapping("cards/activate")
+		public String activateCard(@RequestParam Long userId, @RequestParam String last4Digits)
+				throws CardApplicationException {
+			return cardService.activateCard(userId, last4Digits);
+		}
 
 	// Get list of cards by user ID
 	@GetMapping("list")
