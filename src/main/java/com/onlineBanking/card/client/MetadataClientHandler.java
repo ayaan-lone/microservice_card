@@ -23,8 +23,8 @@ public class MetadataClientHandler {
 	        this.restTemplate = restTemplate;
 	    }
 
-	    public CardDto fetchCardTypeFromMetadata(long accountId) throws CardApplicationException {
-			String metadataUrl = ConstantUtil.METADATA_SERVICE_URL + accountId;
+	    public CardDto fetchCardTypeFromMetadata(long cardId) throws CardApplicationException {
+			String metadataUrl = ConstantUtil.METADATA_SERVICE_URL + cardId;
 			ResponseEntity<CardDto> response = restTemplate.getForEntity(metadataUrl, CardDto.class);
 
 			if (!response.getStatusCode().is2xxSuccessful()) {

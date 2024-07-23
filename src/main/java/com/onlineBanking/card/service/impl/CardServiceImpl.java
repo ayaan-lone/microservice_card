@@ -52,10 +52,8 @@ public class CardServiceImpl implements CardService {
 			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.USER_NOT_FOUND);
 		}
 
-		Card card = new Card();
-		card.setUserId(createCardRequestDto.getUserId());
-
-		CardDto cardDetails = metadataClientHandler.fetchCardTypeFromMetadata(createCardRequestDto.getAccountId());
+		
+		CardDto cardDetails = metadataClientHandler.fetchCardTypeFromMetadata(createCardRequestDto.getCardId());
 
 		if ("Debit Card".equalsIgnoreCase(cardDetails.getName())) {
 			Optional<Card> existingCard = cardRepository.findByUserIdAndCardType(createCardRequestDto.getUserId(),
@@ -64,7 +62,9 @@ public class CardServiceImpl implements CardService {
 				throw new CardApplicationException(HttpStatus.CONFLICT, ConstantUtil.DUPLICATE_DEBIT_CARD);
 			}
 		}
-
+		
+		Card card = new Card();
+		card.setUserId(createCardRequestDto.getUserId());
 		card.setDailyLimit(cardDetails.getDailyLimit());
 		card.setMonthlyLimit(cardDetails.getMonthlyLimit());
 		card.setCardType(cardDetails.getName());
@@ -79,7 +79,7 @@ public class CardServiceImpl implements CardService {
 	@Override
 	public String deactivateCard(Long userId, String last4Digits) throws CardApplicationException {
 		// check if the userId is valid
-
+		
 		if (userClientHandler.isUserVerified(userId) == null) {
 			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.USER_NOT_FOUND);
 		}
@@ -93,9 +93,35 @@ public class CardServiceImpl implements CardService {
 		cardRepository.save(card);
 		return ConstantUtil.CARD_CREATED;
 	}
+	
+	@Override
+	public String activateCard(Long userId, String last4Digits) throws CardApplicationException {
+
+		if (userClientHandler.isUserVerified(userId) == null) {
+			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.USER_NOT_FOUND);
+		}
+
+		Optional<Card> cardOpt = cardRepository.findByUserIdAndCardNumberEndsWith(userId, last4Digits);
+		if (!cardOpt.isPresent()) {
+			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.CARD_NOT_FOUND);
+		}
+
+		Card card = cardOpt.get();
+
+		if (card.isActive()) {
+			throw new CardApplicationException(HttpStatus.CONFLICT, ConstantUtil.CARD_ALREADY_ACTIVE);
+		}
+
+		card.setActive(true);
+		cardRepository.save(card);
+		return ConstantUtil.CARD_ACTIVATED;
+
+	}
 
 	@Override
 	public List<Card> findCardByUserId(long userId) throws CardApplicationException {
 		return cardRepository.findByUserId(userId);
 	}
+
+	
 }
