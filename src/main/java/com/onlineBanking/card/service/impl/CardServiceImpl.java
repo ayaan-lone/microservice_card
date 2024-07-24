@@ -230,7 +230,7 @@ public class CardServiceImpl implements CardService {
 	}
 	
 	 @Override
-	    public String updateBalance(Long userId, Long cardNumber, Double amount) throws CardApplicationException {
+	    public String updateBalance(Long userId, Long cardNumber, Double amount, TransactionType transactionType) throws CardApplicationException {
 	        // Fetch card details based on cardNumber
 	        Card card = cardRepository.findByCardNumber(cardNumber);
 		    // Check if the card exists and if the user ID matches
@@ -242,8 +242,14 @@ public class CardServiceImpl implements CardService {
 	        if (!card.isActive() || card.isBlocked()) {
 	            throw new IllegalStateException("Card is either inactive or blocked");
 	        }
+	        
+	        double newBalance;
 
-	        double newBalance = card.getCardBalance() - amount;
+	        if(transactionType.equals(TransactionType.DEBIT)) {
+	        	newBalance = card.getCardBalance() - amount;
+	        }else {
+	        	newBalance = card.getCardBalance()+amount;
+	        }
 
 
 	        card.setCardBalance((long) newBalance);

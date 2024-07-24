@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.onlineBanking.card.entity.Card;
 import com.onlineBanking.card.entity.CardType;
+import com.onlineBanking.card.entity.TransactionType;
 import com.onlineBanking.card.exception.CardApplicationException;
 import com.onlineBanking.card.request.CreateCardRequestDto;
 
@@ -19,6 +20,6 @@ public interface CardService {
 	String handleTransaction(long userId, long cardNumber, long amount) throws CardApplicationException;
 	CardType fetchCardType(long userId, long cardNumber) throws CardApplicationException;
 	double fetchCardBalance(long userId, long cardNumber) throws CardApplicationException;
-	String updateBalance(Long userId, Long cardNumber, Double amount) throws CardApplicationException;
+	String updateBalance(Long userId, Long cardNumber, Double amount, TransactionType transactionType) throws CardApplicationException;
 
 }
