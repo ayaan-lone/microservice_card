@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.onlineBanking.card.entity.Card;
+import com.onlineBanking.card.entity.CardType;
 import com.onlineBanking.card.exception.CardApplicationException;
 import com.onlineBanking.card.request.CreateCardRequestDto;
 import com.onlineBanking.card.service.CardService;
@@ -43,13 +44,13 @@ public class CardController {
 			throws CardApplicationException {
 		return cardService.deactivateCard(userId, last4Digits);
 	}
-	
+
 	// Activate a card
-		@PostMapping("cards/activate")
-		public String activateCard(@RequestParam Long userId, @RequestParam String last4Digits)
-				throws CardApplicationException {
-			return cardService.activateCard(userId, last4Digits);
-		}
+	@PostMapping("cards/activate")
+	public String activateCard(@RequestParam Long userId, @RequestParam String last4Digits)
+			throws CardApplicationException {
+		return cardService.activateCard(userId, last4Digits);
+	}
 
 	// Get list of cards by user ID
 	@GetMapping("list")
@@ -57,4 +58,41 @@ public class CardController {
 		return cardService.findCardByUserId(userId);
 	}
 
+	@PostMapping("/transaction")
+	public ResponseEntity<String> handleTransaction(@RequestParam(name = "userId", required = true) long userId,
+			@RequestParam(name = "cardNumber", required = true) long cardNumber,
+			@RequestParam(name = "amount", required = true) long amount) throws CardApplicationException {
+
+		String response = cardService.handleTransaction(userId, cardNumber, amount);
+		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/fetchCardType")
+	
+	public ResponseEntity<CardType> fetchCardType(@RequestParam(name="userId", required = true)long userId,
+			@RequestParam(name="cardNumber", required = true)long cardNumber) throws CardApplicationException{
+		
+		CardType response = cardService.fetchCardType(userId,cardNumber);
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	  @GetMapping("/fetchCardBalance")
+	    public ResponseEntity<Double> fetchCardBalance(@RequestParam long userId, @RequestParam long cardNumber) throws CardApplicationException {
+	            double balance = cardService.fetchCardBalance(userId, cardNumber);
+	            return ResponseEntity.ok(balance);
+	        }
+	  
+		@PostMapping("/update-balance")
+		public ResponseEntity<String> updateAccountBalance(@RequestParam long userId, @RequestParam long cardNumber, @RequestParam double amount)
+				throws CardApplicationException {
+
+			String response = cardService.updateBalance(userId, cardNumber, amount);
+			return ResponseEntity.status(HttpStatus.OK).body(response);
+
+		}
 }
+
+	
+
+
