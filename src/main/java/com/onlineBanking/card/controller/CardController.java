@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.onlineBanking.card.entity.Card;
 import com.onlineBanking.card.entity.CardType;
 import com.onlineBanking.card.exception.CardApplicationException;
+import com.onlineBanking.card.request.CardTransactionRequestDto;
 import com.onlineBanking.card.request.CreateCardRequestDto;
 import com.onlineBanking.card.service.CardService;
 
@@ -84,10 +85,10 @@ public class CardController {
 	        }
 	  
 		@PostMapping("/update-balance")
-		public ResponseEntity<String> updateAccountBalance(@RequestParam long userId, @RequestParam long cardNumber, @RequestParam double amount)
+		public ResponseEntity<String> updateAccountBalance(@RequestBody CardTransactionRequestDto cardTransactionRequestDto)
 				throws CardApplicationException {
 
-			String response = cardService.updateBalance(userId, cardNumber, amount);
+			String response = cardService.updateBalance(cardTransactionRequestDto);
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 
 		}

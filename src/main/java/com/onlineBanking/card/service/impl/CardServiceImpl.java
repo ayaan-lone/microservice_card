@@ -16,6 +16,7 @@ import com.onlineBanking.card.entity.CardType;
 import com.onlineBanking.card.entity.TransactionType;
 import com.onlineBanking.card.exception.CardApplicationException;
 import com.onlineBanking.card.request.CardDto;
+import com.onlineBanking.card.request.CardTransactionRequestDto;
 import com.onlineBanking.card.request.CreateCardRequestDto;
 import com.onlineBanking.card.request.TransactionDetailsRequestDto;
 import com.onlineBanking.card.service.CardService;
@@ -57,7 +58,7 @@ public class CardServiceImpl implements CardService {
 		
 		CardDto cardDetails = metadataClientHandler.fetchCardTypeFromMetadata(createCardRequestDto.getCardId());
 
-		if ((cardDetails.getName()) == "Debit Card") {
+		if ((cardDetails.getName()).equals("Debit Card") ){
 			Optional<Card> existingCard = cardRepository.findByUserIdAndCardType(createCardRequestDto.getUserId(),
 					"Debit Card");
 			if (existingCard.isPresent()) {
@@ -70,6 +71,12 @@ public class CardServiceImpl implements CardService {
 		card.setDailyLimit(cardDetails.getDailyLimit());
 		card.setMonthlyLimit(cardDetails.getMonthlyLimit());
 		card.setCardType(cardDetails.getName());
+		
+		System.out.println(cardDetails.getName());
+		
+		if(cardDetails.getName().equals("Credit Card")) {
+			card.setCardBalance(cardDetails.getMonthlyLimit());
+		}
 		card.setActive(true);
 		card.setCardNumber(generateCardNumberUtil());
 
@@ -230,11 +237,12 @@ public class CardServiceImpl implements CardService {
 	}
 	
 	 @Override
-	    public String updateBalance(Long userId, Long cardNumber, Double amount) throws CardApplicationException {
+	    public String updateBalance(CardTransactionRequestDto cardTransactionRequestDto) throws CardApplicationException {
 	        // Fetch card details based on cardNumber
-	        Card card = cardRepository.findByCardNumber(cardNumber);
+		 	
+	        Card card = cardRepository.findByCardNumber(cardTransactionRequestDto.getCardNumber());
 		    // Check if the card exists and if the user ID matches
-		    if (card == null || card.getUserId() != userId) {
+		    if (card == null || card.getUserId() != cardTransactionRequestDto.getUserId()) {
 		        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.WRONG_CARD_DETAILS);
 		    }
 
@@ -242,8 +250,15 @@ public class CardServiceImpl implements CardService {
 	        if (!card.isActive() || card.isBlocked()) {
 	            throw new IllegalStateException("Card is either inactive or blocked");
 	        }
+	        
+	        double newBalance;
+	        double amount = cardTransactionRequestDto.getAmount();
 
-	        double newBalance = card.getCardBalance() - amount;
+	        if(cardTransactionRequestDto.getTransactionTypeEnum().equals(TransactionType.DEBIT)) {
+	        	newBalance = card.getCardBalance() - amount;
+	        }else {
+	        	newBalance = card.getCardBalance()+amount;
+	        }
 
 
 	        card.setCardBalance((long) newBalance);
