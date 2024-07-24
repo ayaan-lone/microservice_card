@@ -2,23 +2,22 @@ package com.onlineBanking.card.service.impl;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.onlineBanking.card.client.MetadataClientHandler;
 import com.onlineBanking.card.client.TransactionClientHandler;
 import com.onlineBanking.card.client.UserClientHandler;
 import com.onlineBanking.card.dao.CardRepository;
 import com.onlineBanking.card.entity.Card;
+import com.onlineBanking.card.entity.CardType;
+import com.onlineBanking.card.entity.TransactionType;
 import com.onlineBanking.card.exception.CardApplicationException;
 import com.onlineBanking.card.request.CardDto;
 import com.onlineBanking.card.request.CreateCardRequestDto;
 import com.onlineBanking.card.request.TransactionDetailsRequestDto;
-import com.onlineBanking.card.request.TransactionRequestDTO;
 import com.onlineBanking.card.service.CardService;
 import com.onlineBanking.card.util.ConstantUtil;
 
@@ -29,16 +28,13 @@ public class CardServiceImpl implements CardService {
 	private final UserClientHandler userClientHandler;
 	private final TransactionClientHandler transactionClientHandler;
 	private final MetadataClientHandler metadataClientHandler;
-    private final RestTemplate restTemplate;
-
-	@Autowired 
-	public CardServiceImpl(CardRepository cardRepository, RestTemplate restTemplate,
+    @Autowired 
+	public CardServiceImpl(CardRepository cardRepository,
 			UserClientHandler userClientHandler, MetadataClientHandler metadataClientHandler,TransactionClientHandler transactionClientHandler) {
 
 		this.cardRepository = cardRepository;
 		this.userClientHandler = userClientHandler;
 		this.metadataClientHandler = metadataClientHandler;
-		this.restTemplate = restTemplate;
 		this.transactionClientHandler = transactionClientHandler;
 	}
 
@@ -61,7 +57,7 @@ public class CardServiceImpl implements CardService {
 		
 		CardDto cardDetails = metadataClientHandler.fetchCardTypeFromMetadata(createCardRequestDto.getCardId());
 
-		if ("Debit Card".equalsIgnoreCase(cardDetails.getName())) {
+		if ((cardDetails.getName()) == "Debit Card") {
 			Optional<Card> existingCard = cardRepository.findByUserIdAndCardType(createCardRequestDto.getUserId(),
 					"Debit Card");
 			if (existingCard.isPresent()) {
@@ -127,17 +123,15 @@ public class CardServiceImpl implements CardService {
 	@Override
 	public List<Card> findCardByUserId(long userId) throws CardApplicationException {
 		return cardRepository.findByUserId(userId);
+	
 	}
 	
-	
-	
 	@Override
-	public String handleTransaction(TransactionRequestDTO cardTransactionRequest) throws CardApplicationException {
-	    // Retrieve the card using card number
-	    Card card = cardRepository.findByCardNumber(cardTransactionRequest.getCardNumber());
-
+	public double fetchCardBalance(long userId, long cardNumber) throws CardApplicationException {
+	    Card card = cardRepository.findByCardNumber(cardNumber);
+	    
 	    // Check if the card exists and if the user ID matches
-	    if (card == null || card.getUserId() != cardTransactionRequest.getUserId()) {
+	    if (card == null || card.getUserId() != userId) {
 	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.WRONG_CARD_DETAILS);
 	    }
 
@@ -145,15 +139,57 @@ public class CardServiceImpl implements CardService {
 	    if (!card.isActive() || card.isBlocked()) {
 	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.CARD_NOT_AVAILABLE);
 	    }
+	    
+	    return card.getCardBalance();
+	}
+
+	@Override
+	public CardType fetchCardType(long userId, long cardNumber) throws CardApplicationException{
+		Card card = cardRepository.findByCardNumber(cardNumber);
+	    // Check if the card exists and if the user ID matches
+	    if (card == null || card.getUserId() != userId) {
+	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.WRONG_CARD_DETAILS);
+	    }
+
+	    // Check if the card is active and not blocked
+	    if (!card.isActive() || card.isBlocked()) {
+	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.CARD_NOT_AVAILABLE);
+	    }
+	    
+	    		CardType cardTypeEnum = CardType.fromString(card.getCardType());
+	    		return cardTypeEnum;
+	}
+	
+	
+	
+	@Override
+	public String handleTransaction(long userId, long cardNumber, long amount) throws CardApplicationException {
+	    // Retrieve the card using card number
+	    Card card = cardRepository.findByCardNumber(cardNumber);
+
+	    // Check if the card exists and if the user ID matches
+	    if (card == null || card.getUserId() != userId) {
+	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.WRONG_CARD_DETAILS);
+	    }
+
+	    // Check if the card is active and not blocked
+	    if (!card.isActive() || card.isBlocked()) {
+	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.CARD_NOT_AVAILABLE);
+	    }
+	    
+	 // Convert the string to the CardType enum
+	    CardType cardTypeEnum = CardType.fromString(card.getCardType());
 
 	    // Handle transaction based on card type
-	    if ("Debit Card".equals(card.getCardType())) {
-	        return handleDebitCardTransaction(cardTransactionRequest, card);
+	    if (cardTypeEnum == CardType.DEBIT_CARD) {
+	        return handleDebitCardTransaction(userId, cardNumber, cardTypeEnum, amount);
 	    } 
-	    
-	    if ("Credit Card".equals(card.getCardType())) {
-	        return handleCreditCardTransaction(cardTransactionRequest, card);
+
+	    if (cardTypeEnum == CardType.CREDIT_CARD) {
+	        return handleCreditCardTransaction(userId, cardNumber, cardTypeEnum, amount, card);
 	    }
+
+
 
 	    throw new CardApplicationException(HttpStatus.BAD_REQUEST, "Unsupported card type");
 	}
@@ -162,12 +198,12 @@ public class CardServiceImpl implements CardService {
 
 
 
-	public String handleDebitCardTransaction(TransactionRequestDTO cardTransactionRequest, Card card) throws CardApplicationException {
+	public String handleDebitCardTransaction(long userId, long cardNumber, CardType cardTypeEnum, long amount) throws CardApplicationException {
         // Prepare TransactionDetailsRequestDto for Debit Card Transaction
         TransactionDetailsRequestDto transactionRequestDto = new TransactionDetailsRequestDto();
-        transactionRequestDto.setUserId(cardTransactionRequest.getUserId());
-        transactionRequestDto.setAmount(cardTransactionRequest.getAmount());
-        transactionRequestDto.setTransactionType(cardTransactionRequest.getTransactionType());
+        transactionRequestDto.setUserId(userId);
+        transactionRequestDto.setAmount(amount);
+        transactionRequestDto.setTransactionType(TransactionType.DEBIT);
 
         // Communicate with the Transaction Service to handle Debit Card transactions
         String response = transactionClientHandler.handleDebitCardTransactions(transactionRequestDto);
@@ -180,18 +216,41 @@ public class CardServiceImpl implements CardService {
     }
 
 
-	private String handleCreditCardTransaction(TransactionRequestDTO cardTransactionRequest, Card card) throws CardApplicationException {
+	private String handleCreditCardTransaction(long userId, long cardNumber, CardType cardTypeEnum, long amount, Card card) throws CardApplicationException {
 	    // Check if there is sufficient balance on the card
-	    if (card.getMonthlyLimit() < cardTransactionRequest.getAmount()) {
+	    if (card.getCardBalance() < amount){
 	        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.INSUFFICIENT_BALANCE);
 	    }
 
 	    // Deduct amount from the card's monthly limit
-	    card.setMonthlyLimit((long) (card.getMonthlyLimit() - cardTransactionRequest.getAmount()));
+	    card.setCardBalance((long) (card.getCardBalance() - amount));
 	    cardRepository.save(card);
 
-	    return "Transaction Successful, Updated Balance : "+card.getMonthlyLimit();
+	    return "Transaction Successful, Updated Balance : "+card.getCardBalance();
 	}
+	
+	 @Override
+	    public String updateBalance(Long userId, Long cardNumber, Double amount) throws CardApplicationException {
+	        // Fetch card details based on cardNumber
+	        Card card = cardRepository.findByCardNumber(cardNumber);
+		    // Check if the card exists and if the user ID matches
+		    if (card == null || card.getUserId() != userId) {
+		        throw new CardApplicationException(HttpStatus.BAD_REQUEST, ConstantUtil.WRONG_CARD_DETAILS);
+		    }
+
+	        // Check if the card is active and not blocked
+	        if (!card.isActive() || card.isBlocked()) {
+	            throw new IllegalStateException("Card is either inactive or blocked");
+	        }
+
+	        double newBalance = card.getCardBalance() - amount;
+
+
+	        card.setCardBalance((long) newBalance);
+	        cardRepository.save(card);
+
+	        return "Balance updated successfully. New Balance: " + newBalance;
+	    }
 
 
     

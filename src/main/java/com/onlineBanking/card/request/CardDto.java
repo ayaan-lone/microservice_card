@@ -10,7 +10,7 @@ public class CardDto {
     // Constructors
     public CardDto(Long id, String name,  Integer daily_limit, Integer monthly_limit) {
         this.id = id;
-        this.name = name;
+        this.name= name;
         this.daily_limit = daily_limit;
         this.monthly_limit = monthly_limit;
     }

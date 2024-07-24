@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,6 +35,8 @@ public class Card implements Serializable {
 	private long dailyLimit;
 	@Column
 	private long monthlyLimit;
+	@Column
+	private Long cardBalance = monthlyLimit;
 
 	public long getId() {
 		return id;
@@ -97,6 +101,23 @@ public class Card implements Serializable {
 	public void setMonthlyLimit(long monthlyLimit) {
 		this.monthlyLimit = monthlyLimit;
 	}
+
+	   @PrePersist
+	    @PreUpdate
+	    private void initializeCardBalance() {
+	        if (this.cardBalance == null) {
+	            this.cardBalance = this.monthlyLimit;
+	        }
+	    }
+	public Long getCardBalance() {
+		return cardBalance;
+	}
+
+	public void setCardBalance(Long cardBalance) {
+		this.cardBalance = cardBalance;
+	}
+	
+	
 
 	}
 

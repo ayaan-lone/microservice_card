@@ -1,11 +1,9 @@
 package com.onlineBanking.card.request;
 
-import com.onlineBanking.card.entity.TransactionType;
-
 public class TransactionRequestDTO {
     private long userId;
     private long cardNumber;
-    private TransactionType transactionType;
+//    private TransactionType transactionType;
     private double amount;
     // Getters and setters
 	public long getUserId() {
@@ -20,12 +18,12 @@ public class TransactionRequestDTO {
 	public void setCardNumber(long cardNumber) {
 		this.cardNumber = cardNumber;
 	}
-	public TransactionType getTransactionType() {
-		return transactionType;
-	}
-	public void setTransactionType(TransactionType transactionType) {
-		this.transactionType = transactionType;
-	}
+//	public TransactionType getTransactionType() {
+//		return transactionType;
+//	}
+//	public void setTransactionType(TransactionType transactionType) {
+//		this.transactionType = transactionType;
+//	}
 	public double getAmount() {
 		return amount;
 	}
