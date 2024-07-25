@@ -4,13 +4,13 @@ public class CardDto {
 	private Long id;
     private String name;
     
-    private Integer daily_limit;
-    private Integer monthly_limit;
+    private Long daily_limit;
+    private Long  monthly_limit;
 
     // Constructors
-    public CardDto(Long id, String name,  Integer daily_limit, Integer monthly_limit) {
+    public CardDto(Long id, String name,  Long daily_limit, Long monthly_limit) {
         this.id = id;
-        this.name = name;
+        this.name= name;
         this.daily_limit = daily_limit;
         this.monthly_limit = monthly_limit;
     }
@@ -33,19 +33,19 @@ public class CardDto {
         this.name = name;
     }
 
-    public Integer getDailyLimit() {
+    public Long getDailyLimit() {
         return daily_limit;
     }
 
-    public void setDailyLimit(Integer daily_limit) {
+    public void setDailyLimit(Long daily_limit) {
         this.daily_limit = daily_limit;
     }
 
-    public Integer getMonthlyLimit() {
+    public Long getMonthlyLimit() {
         return monthly_limit;
     }
 
-    public void setMonthlyLimit(Integer monthly_limit) {
+    public void setMonthlyLimit(Long monthly_limit) {
         this.monthly_limit = monthly_limit;
     }
     
