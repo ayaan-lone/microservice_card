@@ -5,8 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
-
-import com.microservice.common_utils.JwtException;
+import io.jsonwebtoken.*;
 
 @ControllerAdvice
 public class CardApplicationExceptionHandler {
@@ -21,7 +20,7 @@ public class CardApplicationExceptionHandler {
 		return ResponseEntity.status(httpClientErrorException.getStatusCode())
 				.body(httpClientErrorException.getMessage());
 	}
-	@ExceptionHandler(JwtException.class)
+	@ExceptionHandler(io.jsonwebtoken.JwtException.class)
     public ResponseEntity<String> handleJwtException(JwtException ex) {
         // Return a custom error message and a status code of your choice
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT Error: " + ex.getMessage());
