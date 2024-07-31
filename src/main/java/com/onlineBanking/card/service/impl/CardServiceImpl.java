@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.microservice.common_utils.JwtUtil;
 import com.onlineBanking.card.client.MetadataClientHandler;
 import com.onlineBanking.card.client.TransactionClientHandler;
-import com.onlineBanking.card.client.UserClientHandler;
 import com.onlineBanking.card.dao.CardRepository;
 import com.onlineBanking.card.entity.Card;
 import com.onlineBanking.card.entity.CardType;
@@ -27,16 +25,15 @@ import com.onlineBanking.card.util.ConstantUtil;
 public class CardServiceImpl implements CardService {
 	private final CardRepository cardRepository;
 
-	private final UserClientHandler userClientHandler;
 	private final TransactionClientHandler transactionClientHandler;
 	private final MetadataClientHandler metadataClientHandler;
 
 	@Autowired
-	public CardServiceImpl(CardRepository cardRepository, UserClientHandler userClientHandler,
-			MetadataClientHandler metadataClientHandler, TransactionClientHandler transactionClientHandler) {
+	public CardServiceImpl(CardRepository cardRepository, MetadataClientHandler metadataClientHandler,
+			TransactionClientHandler transactionClientHandler) {
 
 		this.cardRepository = cardRepository;
-		this.userClientHandler = userClientHandler;
+
 		this.metadataClientHandler = metadataClientHandler;
 		this.transactionClientHandler = transactionClientHandler;
 	}
@@ -55,8 +52,6 @@ public class CardServiceImpl implements CardService {
 
 		CardDto cardDetails = metadataClientHandler.fetchCardTypeFromMetadata(createCardRequestDto.getCardId());
 
-		System.out.println("Create Card");
-		
 		if ((cardDetails.getName()).equals("Debit Card")) {
 			Optional<Card> existingCard = cardRepository.findByUserIdAndCardType(userId, "Debit Card");
 			if (existingCard.isPresent()) {
@@ -70,8 +65,6 @@ public class CardServiceImpl implements CardService {
 		card.setMonthlyLimit(cardDetails.getMonthlyLimit());
 		card.setCardType(cardDetails.getName());
 
-		System.out.println(cardDetails.getName());
-
 		if (cardDetails.getName().equals("Credit Card")) {
 			card.setCardBalance(cardDetails.getMonthlyLimit());
 		}
@@ -79,17 +72,11 @@ public class CardServiceImpl implements CardService {
 		card.setCardNumber(generateCardNumberUtil());
 
 		cardRepository.save(card);
-
 		return "Card created succesfully";
 	}
 
 	@Override
 	public String deactivateCard(Long userId, String last4Digits) throws CardApplicationException {
-		// check if the userId is valid
-
-		if (userClientHandler.isUserVerified(userId) == null) {
-			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.USER_NOT_FOUND);
-		}
 
 		Optional<Card> cardOpt = cardRepository.findByUserIdAndCardNumberEndsWith(userId, last4Digits);
 		if (!cardOpt.isPresent()) {
@@ -103,10 +90,6 @@ public class CardServiceImpl implements CardService {
 
 	@Override
 	public String activateCard(Long userId, String last4Digits) throws CardApplicationException {
-
-		if (userClientHandler.isUserVerified(userId) == null) {
-			throw new CardApplicationException(HttpStatus.NOT_FOUND, ConstantUtil.USER_NOT_FOUND);
-		}
 
 		Optional<Card> cardOpt = cardRepository.findByUserIdAndCardNumberEndsWith(userId, last4Digits);
 		if (!cardOpt.isPresent()) {
@@ -128,7 +111,6 @@ public class CardServiceImpl implements CardService {
 	@Override
 	public List<Card> findCardByUserId(long userId) throws CardApplicationException {
 		return cardRepository.findByUserId(userId);
-
 	}
 
 	@Override

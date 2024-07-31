@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CreateCardRequestDto {
 
-	@JsonProperty("userId")
-	private long userId;
+
 
 	@JsonProperty("accountId")
 	private long accountId;
@@ -13,8 +12,7 @@ public class CreateCardRequestDto {
 	@JsonProperty("id")
 	private long cardId;
 
-	public CreateCardRequestDto(long userId, long accountId, long cardId) {
-		this.userId = userId;
+	public CreateCardRequestDto(long accountId, long cardId) {
 		this.accountId = accountId;
 		this.cardId= cardId;
 	}
@@ -25,14 +23,6 @@ public class CreateCardRequestDto {
 
 	public void setCardId(long cardId) {
 		this.cardId = cardId;
-	}
-
-	public long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(long userId) {
-		this.userId = userId;
 	}
 
 	public long getAccountId() {
